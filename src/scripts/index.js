@@ -3,20 +3,32 @@ import * as p5 from "p5";
 import * as Tone from "tone";
 
 const synth = new Tone.Synth().toMaster();
-
+const lastKey = localStorage.getItem("last-key") || "0";
+const thisKey = `OK${Date()}`;
 const s = instance => {
   const sk = instance;
-  const savedRects = JSON.parse(
-    localStorage.getItem(
-      "Tue Mar 03 2020 23:07:29 GMT+0100 (Central European Standard Time)"
-    )
-  );
+  const savedRects = JSON.parse(localStorage.getItem(lastKey)) || [];
   let currentRectNumber = 0;
   let rect = { x: 0, y: 0, r: 30, fill: [1, 1, 1, 1], increment: 5, stop: -5 };
   const rects = [{ ...rect }];
+
   const playback = () => {
     return savedRects.length > 0 && true;
   };
+  let looping = true;
+
+  const saveCapture = () => {
+    sk.noLoop();
+    if (sk.pixelDensity() > 5) {
+      sk.saveCanvas(document.querySelector("canvas"), `ok${Date()}`, "png");
+      if (!playback()) {
+        console.log(JSON.stringify(rects));
+        localStorage.setItem(thisKey, JSON.stringify(rects));
+        localStorage.setItem("last-key", thisKey);
+      }
+    }
+  };
+
   sk.setup = () => {
     sk.pixelDensity(30);
     sk.createCanvas(100, 100);
@@ -36,6 +48,7 @@ const s = instance => {
     if (rect.y > Math.abs(sk.height - rect.r - rect.stop)) {
       if (playback()) {
         currentRectNumber += 1;
+        // disable this line for shoulie, green, yellow-blue
         rect = savedRects[currentRectNumber];
       } else {
         // generate new rect
@@ -62,22 +75,12 @@ const s = instance => {
       if (rect.increment > 3) {
         rect.stop += 10;
         if (rect.stop > sk.width) {
-          sk.noLoop();
-          if (sk.pixelDensity() > 5) {
-            sk.saveCanvas(
-              document.querySelector("canvas"),
-              `ok${Date()}`,
-              "png"
-            );
-            console.log(JSON.stringify(rects));
-            localStorage.setItem(Date(), JSON.stringify(rects));
-          }
-
+          saveCapture();
           setTimeout(() => {
             sk.clear();
             rect = { x: 0, y: 0, r: 30, fill: 0, increment: 5, stop: -5 };
             sk.loop();
-          }, 5000);
+          }, 10000);
         }
       }
     }
@@ -87,14 +90,16 @@ const s = instance => {
   sk.keyPressed = () => {
     switch (sk.keyCode) {
       case 32:
-        sk.saveCanvas(
-          document.querySelector("canvas"),
-          `ok${Math.random()}`,
-          "png"
-        );
+        saveCapture();
         break;
-      case 66:
-        sk.noLoop();
+      case 78:
+        if (looping) {
+          sk.noLoop();
+          looping = !looping;
+        } else {
+          sk.loop();
+          looping = !looping;
+        }
         break;
       default:
     }
