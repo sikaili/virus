@@ -4,6 +4,9 @@ body {
   color: $body-color;
   font-family: sans-serif;
 }
-canvas {
+canvas.p5Canvas {
+  display:block;
+  margin-left: auto;
+  margin-right: auto;
   padding:300px;
 }

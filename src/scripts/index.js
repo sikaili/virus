@@ -6,7 +6,7 @@ const s = instance => {
   let stop = -5;
   let rect = { x: 0, y: 0, r: 30, fill: 0, increment: 5 };
   sk.setup = () => {
-    sk.pixelDensity(30.0);
+    sk.pixelDensity(10.0);
     sk.createCanvas(100, 100);
     sk.background(255, 255, 0);
     sk.noStroke();
@@ -38,11 +38,11 @@ const s = instance => {
         sk.scale(3);
         if (stop > sk.width) {
           sk.noLoop();
-          sk.saveCanvas(
-            document.querySelector("canvas"),
-            `ok${Math.random()}`,
-            "png"
-          );
+          // sk.saveCanvas(
+          //   document.querySelector("canvas"),
+          //   `ok${Math.random()}`,
+          //   "png"
+          // );
           setTimeout(() => {
             sk.clear();
             rect = { x: 0, y: 0, r: 30, fill: 0, increment: 5 };
