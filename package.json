@@ -50,7 +50,8 @@
   "dependencies": {
     "@babel/polyfill": "^7.8.3",
     "core-js": "^3.6.4",
-    "p5": "^1.0.0"
+    "p5": "^1.0.0",
+    "tone": "^13.8.25"
   },
   "main": ".eslintrc.js"
 }
