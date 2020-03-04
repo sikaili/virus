@@ -3,7 +3,7 @@ import * as p5 from "p5";
 import * as Tone from "tone";
 
 const synth = new Tone.Synth().toMaster();
-const lastKey = localStorage.getItem("last-key") || "0";
+const lastKey = localStorage.getItem("last-key") || "notok";
 const thisKey = `OK${Date()}`;
 const s = instance => {
   const sk = instance;
@@ -13,7 +13,7 @@ const s = instance => {
   const rects = [{ ...rect }];
 
   const playback = () => {
-    return savedRects.length > 0 && true;
+    return savedRects.length > 0 && false;
   };
   let looping = true;
 
@@ -28,11 +28,12 @@ const s = instance => {
       }
     }
   };
-
+  sk.speed = 0.05;
   sk.setup = () => {
-    sk.pixelDensity(30);
+    sk.noLoop();
+    sk.pixelDensity(1);
     sk.createCanvas(100, 100);
-    sk.background(255, 255, 0);
+    sk.background(255, 255, 100);
     sk.noStroke();
   };
   sk.draw = () => {
@@ -43,6 +44,16 @@ const s = instance => {
       rect.x = sk.width - rect.r;
       rect.y += rect.increment;
     } else {
+      synth.triggerAttackRelease(
+        sk.constrain(
+          Math.abs(rect.fill[1] / rect.fill[2]) * rect.increment +
+            rect.x * 4 -
+            rect.y * 10,
+          40,
+          200000
+        ),
+        "1"
+      );
       rect.x += rect.increment;
     }
     if (rect.y > Math.abs(sk.height - rect.r - rect.stop)) {
@@ -53,28 +64,26 @@ const s = instance => {
       } else {
         // generate new rect
         rect.fill = [
-          sk.random(-700, 300),
-          sk.random(-255, 100),
-          sk.random(-500, 500)
+          Math.floor(sk.random(-700, 300)),
+          Math.floor(sk.random(-255, 100)),
+          Math.floor(sk.random(-500, 500))
         ];
-        rect.r += (Math.random() - 0.3) * 30;
+        rect.r += Math.floor(Math.random() * 5) * 6;
         rect.x = -5;
         rect.y = -5;
         rects.push({ ...rect });
       }
-      synth.triggerAttackRelease(
-        Math.abs(rect.fill[1] / rect.fill[2]) * rect.increment,
-        "6"
-      );
     }
     if (rect.r > Math.abs(sk.height - rect.stop)) {
       rect.r = 10;
       if (!playback()) {
-        rect.increment = (Math.random() * 1000) / rect.r;
+        rect.increment = Math.ceil(
+          (Math.ceil(Math.random() * 33) * 33) / rect.r
+        );
       }
       if (rect.increment > 3) {
-        rect.stop += 10;
-        if (rect.stop > sk.width) {
+        rect.stop += ((sk.width / 3) * 3 - rect.stop) * sk.speed;
+        if (rect.stop > sk.width * 100) {
           saveCapture();
           setTimeout(() => {
             sk.clear();
@@ -107,3 +116,26 @@ const s = instance => {
 };
 
 const P5 = new p5(s);
+P5.speed = 0.01;
+const P51 = new p5(s);
+P51.speed = 0.1;
+const P52 = new p5(s);
+P52.speed = 0.05;
+const P53 = new p5(s);
+P53.speed = 0.01;
+const P54 = new p5(s);
+P54.speed = 0.1;
+const P55 = new p5(s);
+P55.speed = 0.05;
+
+document.querySelector("body").addEventListener("click", async () => {
+  await Tone.start();
+  P5.loop();
+  P51.loop();
+  P52.loop();
+  P53.loop();
+  P54.loop();
+  P55.loop();
+
+  console.log("audio is ready");
+});
