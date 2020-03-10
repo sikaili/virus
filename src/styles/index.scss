@@ -3,9 +3,13 @@ $body-color: slateblue;
 body {
   color: $body-color;
   font-family: sans-serif;
+  padding:0 0 0 0;
+  margin:0 0 0 0;
 }
 canvas.p5Canvas {
   display:block;
   margin-left: auto;
   margin-right: auto;
+  padding:0 0 0 0;
 }
+
