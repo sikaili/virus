@@ -61,7 +61,7 @@ const s = instance => {
       if (particle.virus) {
       }
     });
-    sk.fill(255, 100, 100, 160);
+    sk.fill(255, 100, 100, 200);
     sk.ellipse(sk.mouseX, sk.mouseY, 80);
     sk.text(
       `${count} Days\n${(
