@@ -2,10 +2,10 @@ import calDistance from "../utils/calDistance";
 
 export default class Particle {
   constructor(x, y, virus, number) {
-    const scale = 100 / number;
+    const scale = 200 / number;
     this.r = (25 + Math.random() * 15) * scale;
+    this.r = this.r < 5 ? 5 : this.r;
     this.pos = { x, y };
-    // this.fill = Math.random() * 120 + 120;
     this.updating = true;
     if (virus) {
       this.virus = true;
@@ -38,9 +38,9 @@ export default class Particle {
 
   update(pos) {
     this.updating = true;
-    this.pos.x += (pos.x - this.pos.x) * 0.1;
+    this.pos.x += (pos.x - this.pos.x) * 0.08;
     this.pos.y += (pos.y - this.pos.y) * 0.08;
-    if (calDistance(pos.x, this.pos.x, pos.y, this.pos.y) < 1) {
+    if (calDistance(pos.x, this.pos.x, pos.y, this.pos.y) < 3) {
       this.updating = false;
     }
   }
@@ -59,7 +59,7 @@ export default class Particle {
           this.pos.y
         ) < 100
       ) {
-        sk.strokeWeight(10);
+        sk.strokeWeight(this.r / 2);
         sk.stroke([...this.fill.slice(0, 4)]);
         sk.line(this.pos.x, this.pos.y, this.mother.pos.x, this.mother.pos.y);
       }

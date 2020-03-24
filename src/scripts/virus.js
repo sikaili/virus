@@ -21,8 +21,8 @@ const s = instance => {
   let virusNo = 4;
   let count = 0;
   const deathByDay = [];
-  const number = 300;
-
+  let number = parseInt(prompt("Enter a number (250-1000)", "0"));
+  number = number || 250;
   sk.setup = () => {
     // sk.pixelDensity(3);
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
@@ -77,7 +77,12 @@ const s = instance => {
       sk.strokeWeight(10);
       const x = 20 + i * 10;
       sk.textSize(8);
-      sk.line(x, sk.height - deathByDay[i] * 8, x, sk.height);
+      sk.line(
+        x,
+        sk.height - ((deathByDay[i] * 8) / number) * 250,
+        x,
+        sk.height
+      );
       sk.noStroke();
       sk.text(i, x, sk.height - 5);
     }
@@ -89,7 +94,9 @@ const s = instance => {
 
   sk.handleTouchEnd = () => {
     if (!particles.every(a => !a.updating)) {
-      return;
+      particles.forEach((particle, index) => {
+        particle.pos = positions[index];
+      });
     }
     if (virusNo > 0) {
       particles.push(new Particle(sk.mouseX, sk.mouseY, true, number));
