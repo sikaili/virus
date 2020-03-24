@@ -21,8 +21,9 @@ const s = instance => {
   let virusNo = 4;
   let count = 0;
   const deathByDay = [];
-  let number = parseInt(prompt("Enter a number (250-1000)", "0"));
-  number = number || 250;
+  const number = parseInt(prompt("Enter a number (250-1000)", "0")) || 250;
+  // number = number || 250;
+  // const number = 300;
   sk.setup = () => {
     // sk.pixelDensity(3);
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
@@ -34,6 +35,7 @@ const s = instance => {
     sk.textSize(40);
     sk.strokeCap(sk.SQUARE);
     window.addEventListener("touchend", sk.handleTouchEnd);
+    window.addEventListener("mouseup", sk.handleTouchEnd);
 
     // particles.sort((a, b) => a.pos.y - b.pos.y);
 
@@ -42,7 +44,7 @@ const s = instance => {
         sk.random(0, sk.width),
         sk.random(0, sk.height),
         false,
-        number
+        number * (1000 / (sk.width + sk.height))
       );
       positions[i] = { x: sk.random(0, sk.width), y: sk.random(0, sk.height) };
     }
@@ -92,12 +94,14 @@ const s = instance => {
     sk.pop();
   };
 
-  sk.handleTouchEnd = () => {
+  sk.handleTouchEnd = ev => {
+    ev.preventDefault();
     if (!particles.every(a => !a.updating)) {
       particles.forEach((particle, index) => {
         particle.pos = positions[index];
       });
     }
+
     if (virusNo > 0) {
       particles.push(new Particle(sk.mouseX, sk.mouseY, true, number));
       positions.push({ x: sk.mouseX, y: sk.mouseY });
@@ -105,22 +109,24 @@ const s = instance => {
     }
 
     count += 1;
+
     let deathToday = 0;
     particles.forEach(particle => {
-      if (Math.random() > 0.9 && particle.virus && !particle.died) {
+      if (Math.random() > 0.95 && particle.virus && !particle.died) {
         particle.died = true;
         deathToday += 1;
       }
     });
     deathByDay.push(deathToday);
+
     positions = positions.map(a => {
-      if (particles.every(a => a.virus) && Math.random() > 0.3) {
-        return {
-          x: sk.mouseX + sk.random(-150, 50),
-          y: sk.mouseY + sk.random(-50, 150)
-        };
-      }
-      if (Math.random() > 0.9) {
+      // if (particles.every(a => a.virus) && Math.random() > 0.3) {
+      //   return {
+      //     x: sk.mouseX + sk.random(-150, 50),
+      //     y: sk.mouseY + sk.random(-50, 150)
+      //   };
+      // }
+      if (Math.random() > 0.98) {
         return {
           ancient: { x: a.x, y: a.y },
           x: sk.mouseX + sk.random(-50, 50),
@@ -128,10 +134,15 @@ const s = instance => {
         };
       }
       if (Math.random() > 0.8) {
+        const distance = number;
+        let x = a.x + sk.random(-distance, distance);
+        let y = a.y + sk.random(-distance, distance);
+        x = x < 0 ? sk.random(0, sk.width) : x;
+        y = y < 0 ? sk.random(0, sk.height) : y;
         return {
           ancient: { x: a.x, y: a.y },
-          x: sk.random(0, sk.width),
-          y: sk.random(0, sk.height)
+          x,
+          y
         };
       }
       if (Math.random() > 0.5 && a.ancient) {

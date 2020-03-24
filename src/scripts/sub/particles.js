@@ -20,18 +20,16 @@ export default class Particle {
 
   contagion(particles) {
     particles.forEach(particle => {
-      // particle.updating = true;s
-      // this.updating = true;
       if (
         calDistance(particle.pos.x, this.pos.x, particle.pos.y, this.pos.y) <
           this.r / 2 &&
         this.virus &&
         !particle.virus &&
-        Math.random() > 0.5
+        Math.random() > 0.6
       ) {
         particle.virus = true;
         particle.mother = this;
-        particle.fill = [...this.fill.slice(0, 3), Math.abs(this.fill[3] - 40)];
+        particle.fill = [...this.fill.slice(0, 3), Math.abs(this.fill[3] - 30)];
       }
     });
   }
@@ -57,7 +55,8 @@ export default class Particle {
           this.pos.x,
           this.mother.pos.y,
           this.pos.y
-        ) < 100
+        ) <
+          this.r * 3
       ) {
         sk.strokeWeight(this.r / 2);
         sk.stroke([...this.fill.slice(0, 4)]);
