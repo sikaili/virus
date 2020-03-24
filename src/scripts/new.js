@@ -34,9 +34,9 @@ const s = instance => {
       rect.r = (Math.floor(Math.random() * 5) * sk.scaleRef) / 15;
       rect.x = sk.width / 2;
       rect.y = note + 100;
-      synth.triggerAttackRelease(note, "16n");
+      synth.triggerAttackRelease(note, "4n");
     },
-    [440, 220, [440, 220, [440, 220, 440]]]
+    [110, 220, [55, 220, [440, 880, 440]]]
   );
   sk.setup = () => {
     sk.pixelDensity(3);
@@ -45,11 +45,13 @@ const s = instance => {
     sk.background(0);
     sk.noStroke();
     sk.rectMode(sk.CENTER);
+    seq.humanize = true;
+    seq.probability = 1;
     seq.start();
-    Tone.Transport.schedule(triggerSynth, 0);
-    Tone.Transport.schedule(triggerSynth, "16n");
-    Tone.Transport.schedule(triggerSynth, "8n");
-    Tone.Transport.schedule(triggerSynth, "4n");
+    // Tone.Transport.schedule(triggerSynth, 0);
+    // Tone.Transport.schedule(triggerSynth, "16n");
+    // Tone.Transport.schedule(triggerSynth, "8n");
+    // Tone.Transport.schedule(triggerSynth, "4n");
 
     Tone.Transport.loopEnd = "1:0:0";
     Tone.Transport.loop = true;
@@ -93,8 +95,10 @@ const s = instance => {
         Tone.Transport.clear(2);
         break;
       default:
-        Tone.Transport.schedule(triggerSynth, "3n");
+        // Tone.Transport.schedule(triggerSynth, "3n");
         console.log(Tone.Transport);
+        seq.at(2, [220, sk.random(220, 480)]);
+        console.log(seq);
     }
   };
 
