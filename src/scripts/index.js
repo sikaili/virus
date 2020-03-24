@@ -3,6 +3,7 @@ import * as p5 from "p5";
 import * as Tone from "tone";
 import s from "./squerror";
 import n from "./new";
+import virus from "./virus";
 
 const distortion = new Tone.Distortion(0.1);
 const tremolo = new Tone.Tremolo(5, 0.6).start();
@@ -26,8 +27,8 @@ n.synth = synth;
 n.Tone = Tone;
 
 // const squerror = new p5(s);
-const current = new p5(n);
-
+const current = new p5(virus);
+p5.friendlyReport = false;
 document.querySelector("body").addEventListener("click", async () => {
   await Tone.start();
   // squerror.loop();
