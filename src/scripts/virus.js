@@ -2,22 +2,66 @@ import { Engine, World, Bodies, MouseConstraint } from "matter-js";
 import Particle from "./sub/particles";
 
 const engine = Engine.create();
-const mouseConstraint = MouseConstraint.create(engine, {
-  constraint: {
-    stiffness: 0.2,
-    render: {
-      visible: false
+const setBordersAndMouse = sk => {
+  const border1 = Bodies.rectangle(0, 0, 10, 4000, {
+    isStatic: true
+  });
+  const border2 = Bodies.rectangle(sk.width, 0, 10, 4000, {
+    isStatic: true
+  });
+  const border3 = Bodies.rectangle(0, 0, 4000, 10, {
+    isStatic: true
+  });
+  const border4 = Bodies.rectangle(0, sk.height, 4000, 10, {
+    isStatic: true
+  });
+  const mouseConstraint = MouseConstraint.create(engine, {
+    constraint: {
+      stiffness: 0.2,
+      render: {
+        visible: false
+      }
     }
-  }
-});
+  });
+  World.add(engine.world, [
+    border1,
+    border2,
+    border3,
+    border4,
+    mouseConstraint
+  ]);
+};
 engine.world.gravity.y = 0;
-World.add(engine.world, mouseConstraint);
 Engine.run(engine);
+
+const handleBodyClick = () => {
+  if (typeof DeviceMotionEvent.requestPermission === "function") {
+    DeviceMotionEvent.requestPermission()
+      .then(permissionState => {
+        if (permissionState === "granted") {
+          window.addEventListener("deviceorientation", e => {
+            engine.world.gravity.x = e.gamma / 90;
+            const arr = ["alpha", "beta", "gamma"];
+            arr.map(a => {
+              document.createElement("p");
+            });
+            document.querySelectors("p").map((a, i) => {
+              a.innerHtml = e[arr[i]];
+            });
+          });
+        }
+      })
+      .catch(console.error);
+  } else {
+    // handle regular non iOS 13+ devices
+  }
+};
 
 const s = instance => {
   const sk = instance;
-  const { synth, Tone } = s;
+  const { synth, sampler, sampler2 } = s;
   // save and get last
+
   sk.lastKey = localStorage.getItem("last-key") || "notok";
   sk.thisKey = `OK${Date()}`;
   sk.get = (key = sk.lastKey) => {
@@ -33,20 +77,19 @@ const s = instance => {
   const particles = [];
   let positions = [];
   let virusNo = 3;
-  let count = 0;
   const deathByDay = [];
-  // const number = parseInt(prompt("Enter a number (250-1000)", "0")) || 250;
   const number = 230;
   const cursor = {
     color: [Math.random() * 120, Math.random() * 120, Math.random() * 120, 255],
     r: 80,
     text: `virus ${virusNo}`
   };
-
+  let count = 0;
   let touched = false;
   sk.setup = () => {
-    // sk.pixelDensity(10);
+    // sampler.triggerAttack("C3");
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
+    setBordersAndMouse(sk);
     sk.scaleRef = (sk.width + sk.height) / 2;
     sk.background(0);
     sk.noStroke();
@@ -54,49 +97,6 @@ const s = instance => {
     sk.textAlign(sk.CENTER);
     sk.textSize(40);
     sk.strokeCap(sk.SQUARE);
-    window.addEventListener("touchstart", sk.handleTouchEnd, {
-      passive: false
-    });
-    window.addEventListener(
-      "touchend",
-      () => {
-        touched = false;
-      },
-      {
-        passive: false
-      }
-    );
-    window.addEventListener("mousedown", sk.handleTouchEnd, {
-      passive: false
-    });
-    window.addEventListener(
-      "mouseup",
-      () => {
-        touched = false;
-      },
-      {
-        passive: false
-      }
-    );
-    window.addEventListener("touchmove", e => e.preventDefault, {
-      passive: false
-    });
-
-    // particles.sort((a, b) => a.pos.y - b.pos.y);
-    const border1 = Bodies.rectangle(0, 0, 10, 4000, {
-      isStatic: true
-    });
-    const border2 = Bodies.rectangle(sk.width, 0, 10, 4000, {
-      isStatic: true
-    });
-    const border3 = Bodies.rectangle(0, 0, 4000, 10, {
-      isStatic: true
-    });
-    const border4 = Bodies.rectangle(0, sk.height, 4000, 10, {
-      isStatic: true
-    });
-    World.add(engine.world, [border1, border2, border3, border4]);
-
     for (let i = 0; i < number; i += 1) {
       particles[i] = new Particle(
         sk.random(0, sk.width),
@@ -113,19 +113,14 @@ const s = instance => {
   sk.draw = () => {
     sk.background(200, 200, 200);
     sk.noFill();
-    particles.forEach((particle, index) => {
-      // particle.changePos();
-      // sk.fill(0);
-      // sk.rect(particle.body.position.x, particle.body.position.y, 30);
+    particles.forEach(particle => {
       if (!particle.updating) {
-        particle.contagion(particles);
+        particle.contagion(particles, sampler);
       }
       if (touched) {
         particle.changePos();
       }
       particle.display(sk);
-      if (particle.virus) {
-      }
     });
     /*
     // curso
@@ -206,6 +201,7 @@ const s = instance => {
       particles.forEach(particle => {
         if (Math.random() > 0.95 && particle.virus && !particle.died) {
           particle.died = true;
+          sampler2.triggerAttack("C3");
           deathToday += 1;
         }
       });
@@ -275,6 +271,53 @@ const s = instance => {
   sk.windowResized = () => {
     sk.resizeCanvas(sk.windowWidth, sk.windowHeight);
   };
+
+  const setListeners = () => {
+    document
+      .querySelector("body")
+      .addEventListener("click", handleBodyClick, { once: true });
+
+    window.addEventListener("touchstart", sk.handleTouchEnd, {
+      passive: false
+    });
+    window.addEventListener(
+      "touchend",
+      () => {
+        touched = false;
+      },
+      {
+        passive: false
+      }
+    );
+
+    window.addEventListener("mousedown", sk.handleTouchEnd, {
+      passive: false
+    });
+    window.addEventListener(
+      "mouseup",
+      () => {
+        touched = false;
+      },
+      {
+        passive: false
+      }
+    );
+    document.addEventListener(
+      "ontouchmove",
+      m => {
+        m.preventDefault();
+      },
+      { passive: false }
+    );
+    document.addEventListener(
+      "touchmove",
+      ev => {
+        ev.preventDefault();
+      },
+      { passive: false }
+    );
+  };
+  setListeners();
 };
 
 export default s;

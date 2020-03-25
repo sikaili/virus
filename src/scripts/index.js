@@ -1,63 +1,49 @@
 import "../styles/index.scss";
 import * as p5 from "p5";
 import * as Tone from "tone";
-import s from "./squerror";
-import n from "./new";
 import virus from "./virus";
-
-// module aliases
-// const { Engine } = Matter;
-// const { Render } = Matter;
-// const { World } = Matter;
-// const { Bodies } = Matter;
-
-// create an engine
-// const engine = Engine.create();
-
-// create a renderer
-// const render = Render.create({
-//   element: document.body,
-//   engine
-// });
-
-// const boxA = Bodies.rectangle(400, 200, 80, 80);
-// const boxB = Bodies.rectangle(450, 50, 80, 80);
-// const ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-// World.add(engine.world, [boxA, boxB, ground]);
-// virus.boxA = boxA;
-
-// run the engine
-// Engine.run(engine);
-
-// run the renderer
-// Render.run(render);
+import F3 from "../sound/chasing.mp3";
+import D3 from "../sound/light.mp3";
 
 const distortion = new Tone.Distortion(0.1);
 const tremolo = new Tone.Tremolo(5, 0.6).start();
-const synth = new Tone.Synth({
+const synth = new Tone.PolySynth(300, Tone.Synth, {
   oscillator: {
-    type: "sine",
-    modulationType: "sawtooth",
-    modulationIndex: 6,
-    harmonicity: 1
-  },
-  envelope: {
-    attack: 0.4,
-    decay: 0.1,
-    sustain: 0.8,
-    release: 1
+    type: "sine"
   }
-}).chain(distortion, tremolo, Tone.Master);
+}).chain(tremolo, Tone.Master);
 
-s.synth = synth;
-n.synth = synth;
-n.Tone = Tone;
+const sampler = new Tone.Sampler(
+  { F3 },
+  {
+    onload: () => {
+      this.isLoaded = true;
+    }
+  }
+).toMaster();
+const sampler2 = new Tone.Sampler(
+  { D3 },
+  {
+    onload: () => {
+      this.isLoaded = true;
+    }
+  }
+).toMaster();
+virus.sampler = sampler;
+virus.sampler2 = sampler2;
 
-// const squerror = new p5(s);
-const current = new p5(virus);
-p5.friendlyReport = false;
-document.querySelector("body").addEventListener("click", async () => {
-  await Tone.start();
-  // squerror.loop();
-  console.log("audio is ready");
-});
+virus.synth = synth;
+
+p5.disableFriendlyErrors = true;
+const canvas = new p5(virus); //eslint-disable-line
+
+document.querySelector("body").addEventListener(
+  "click",
+  async () => {
+    await Tone.start();
+    console.log("audio is ready"); //eslint-disable-line
+  },
+  { once: true }
+);
+
+window.canvas = canvas;
