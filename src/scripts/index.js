@@ -1,5 +1,4 @@
 import "../styles/index.scss";
-import * as Matter from "matter-js";
 import * as p5 from "p5";
 import * as Tone from "tone";
 import s from "./squerror";

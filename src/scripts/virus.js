@@ -1,4 +1,9 @@
+import { Engine, World, Bodies } from "matter-js";
 import Particle from "./sub/particles";
+
+const engine = Engine.create();
+engine.world.gravity.y = 0;
+Engine.run(engine);
 
 const s = instance => {
   const sk = instance;
@@ -28,6 +33,8 @@ const s = instance => {
     r: 80,
     text: `virus ${virusNo}`
   };
+
+  let touched = false;
   sk.setup = () => {
     // sk.pixelDensity(10);
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
@@ -38,9 +45,45 @@ const s = instance => {
     sk.textAlign(sk.CENTER);
     sk.textSize(40);
     sk.strokeCap(sk.SQUARE);
-    window.addEventListener("touchend", sk.handleTouchEnd);
-    window.addEventListener("mouseup", sk.handleTouchEnd);
+    window.addEventListener("touchstart", sk.handleTouchEnd, {
+      passive: false
+    });
+    window.addEventListener(
+      "touchend",
+      () => {
+        touched = false;
+      },
+      {
+        passive: false
+      }
+    );
+    window.addEventListener("mousedown", sk.handleTouchEnd, {
+      passive: false
+    });
+    window.addEventListener(
+      "mouseup",
+      () => {
+        touched = false;
+      },
+      {
+        passive: false
+      }
+    );
+
     // particles.sort((a, b) => a.pos.y - b.pos.y);
+    const border1 = Bodies.rectangle(0, 0, 10, 4000, {
+      isStatic: true
+    });
+    const border2 = Bodies.rectangle(sk.width, 0, 10, 4000, {
+      isStatic: true
+    });
+    const border3 = Bodies.rectangle(0, 0, 4000, 10, {
+      isStatic: true
+    });
+    const border4 = Bodies.rectangle(0, sk.height, 4000, 10, {
+      isStatic: true
+    });
+    World.add(engine.world, [border1, border2, border3, border4]);
 
     for (let i = 0; i < number; i += 1) {
       particles[i] = new Particle(
@@ -49,6 +92,8 @@ const s = instance => {
         false,
         number * (1000 / (sk.width + sk.height))
       );
+      World.add(engine.world, particles[i].body);
+
       positions[i] = { x: sk.random(0, sk.width), y: sk.random(0, sk.height) };
     }
   };
@@ -57,14 +102,20 @@ const s = instance => {
     sk.background(200, 200, 200);
     sk.noFill();
     particles.forEach((particle, index) => {
+      // particle.changePos();
+      // sk.fill(0);
+      // sk.rect(particle.body.position.x, particle.body.position.y, 30);
       if (!particle.updating) {
         particle.contagion(particles);
       }
-      particle.update(positions[index]);
+      if (touched) {
+        particle.changePos();
+      }
       particle.display(sk);
       if (particle.virus) {
       }
     });
+    /*
     // curso
     sk.push();
     sk.fill(cursor.color);
@@ -106,19 +157,18 @@ const s = instance => {
       ).toFixed(2)}%\n${particles.filter(a => !a.died).length} Left`;
     }
     sk.text(text, sk.width / 2, sk.height * 0.7 - 50);
+    */
   };
 
   sk.handleTouchEnd = ev => {
-    ev.preventDefault();
-    if (!particles.every(a => !a.updating)) {
-      particles.forEach((particle, index) => {
-        particle.pos = positions[index];
-      });
-    }
-
+    touched = true;
+    // ev.preventDefault();
     if (virusNo > 0) {
-      particles.push(new Particle(sk.mouseX, sk.mouseY, cursor.color, number));
+      const particle = new Particle(sk.mouseX, sk.mouseY, cursor.color, number);
+      particles.push(particle);
       positions.push({ x: sk.mouseX, y: sk.mouseY });
+      World.add(engine.world, particle.body);
+
       virusNo -= 1;
       setTimeout(() => {
         cursor.color = [
