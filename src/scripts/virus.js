@@ -1,8 +1,17 @@
-import { Engine, World, Bodies } from "matter-js";
+import { Engine, World, Bodies, MouseConstraint } from "matter-js";
 import Particle from "./sub/particles";
 
 const engine = Engine.create();
+const mouseConstraint = MouseConstraint.create(engine, {
+  constraint: {
+    stiffness: 0.2,
+    render: {
+      visible: false
+    }
+  }
+});
 engine.world.gravity.y = 0;
+World.add(engine.world, mouseConstraint);
 Engine.run(engine);
 
 const s = instance => {
@@ -69,6 +78,9 @@ const s = instance => {
         passive: false
       }
     );
+    window.addEventListener("touchmove", e => e.preventDefault, {
+      passive: false
+    });
 
     // particles.sort((a, b) => a.pos.y - b.pos.y);
     const border1 = Bodies.rectangle(0, 0, 10, 4000, {
