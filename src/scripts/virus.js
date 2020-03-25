@@ -13,19 +13,23 @@ const s = instance => {
     localStorage.setItem(key, JSON.stringify(item));
     localStorage.setItem("last-key", key);
   };
+
   let looping = true;
-  const rect = { x: 30, y: 30, r: 10, fill: [0, 0, 0, 0] };
 
   const particles = [];
   let positions = [];
-  let virusNo = 4;
+  let virusNo = 3;
   let count = 0;
   const deathByDay = [];
-  const number = parseInt(prompt("Enter a number (250-1000)", "0")) || 250;
-  // number = number || 250;
-  // const number = 300;
+  // const number = parseInt(prompt("Enter a number (250-1000)", "0")) || 250;
+  const number = 230;
+  const cursor = {
+    color: [Math.random() * 120, Math.random() * 120, Math.random() * 120, 255],
+    r: 80,
+    text: `virus ${virusNo}`
+  };
   sk.setup = () => {
-    // sk.pixelDensity(3);
+    // sk.pixelDensity(10);
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
     sk.scaleRef = (sk.width + sk.height) / 2;
     sk.background(0);
@@ -36,7 +40,6 @@ const s = instance => {
     sk.strokeCap(sk.SQUARE);
     window.addEventListener("touchend", sk.handleTouchEnd);
     window.addEventListener("mouseup", sk.handleTouchEnd);
-
     // particles.sort((a, b) => a.pos.y - b.pos.y);
 
     for (let i = 0; i < number; i += 1) {
@@ -52,7 +55,6 @@ const s = instance => {
 
   sk.draw = () => {
     sk.background(200, 200, 200);
-    sk.beginShape();
     sk.noFill();
     particles.forEach((particle, index) => {
       if (!particle.updating) {
@@ -63,22 +65,21 @@ const s = instance => {
       if (particle.virus) {
       }
     });
-    sk.fill(255, 100, 100, 200);
-    sk.ellipse(sk.mouseX, sk.mouseY, 80);
-    sk.text(
-      `${count} Days\n${(
-        (particles.filter(a => a.virus).length / particles.length) *
-        100
-      ).toFixed(2)}%\n${particles.filter(a => !a.died).length} Left`,
-      sk.width / 2,
-      sk.height * 0.7
-    );
+    // curso
+    sk.push();
+    sk.fill(cursor.color);
+    sk.ellipse(sk.mouseX, sk.mouseY, cursor.r);
+    sk.textSize(15);
+    sk.fill(255);
+    sk.text(cursor.text, sk.mouseX, sk.mouseY);
+    sk.pop();
+    // graph
     sk.push();
     for (let i = 0; i < deathByDay.length; i += 1) {
       sk.stroke(0, 180);
       sk.strokeWeight(10);
       const x = 20 + i * 10;
-      sk.textSize(8);
+      sk.textSize(5);
       sk.line(
         x,
         sk.height - ((deathByDay[i] * 8) / number) * 250,
@@ -86,12 +87,25 @@ const s = instance => {
         sk.height
       );
       sk.noStroke();
+      sk.fill(255, 125, 125, 220);
       sk.text(i, x, sk.height - 5);
     }
     sk.textSize(10);
-    sk.fill(0);
-    sk.text("plot: death by day", sk.width / 2, sk.height - 15);
+    sk.fill(100);
+    sk.text("plot: deaths/day", sk.width / 2, sk.height - 15);
     sk.pop();
+    // text
+    sk.fill(255, 125, 125, 220);
+    let text;
+    if (virusNo > 0) {
+      text = `place patient 0`;
+    } else {
+      text = `${count} Days\n${(
+        (particles.filter(a => a.virus).length / particles.length) *
+        100
+      ).toFixed(2)}%\n${particles.filter(a => !a.died).length} Left`;
+    }
+    sk.text(text, sk.width / 2, sk.height * 0.7 - 50);
   };
 
   sk.handleTouchEnd = ev => {
@@ -103,53 +117,70 @@ const s = instance => {
     }
 
     if (virusNo > 0) {
-      particles.push(new Particle(sk.mouseX, sk.mouseY, true, number));
+      particles.push(new Particle(sk.mouseX, sk.mouseY, cursor.color, number));
       positions.push({ x: sk.mouseX, y: sk.mouseY });
       virusNo -= 1;
+      setTimeout(() => {
+        cursor.color = [
+          Math.random() * 120,
+          Math.random() * 120,
+          Math.random() * 120,
+          255
+        ];
+        cursor.text = `virus ${virusNo}`;
+      }, 600);
+
+      positions = positions.map(a => {
+        return { x: a.x + sk.random(-30, 30), y: a.y + sk.random(-30, 30) };
+      });
+    } else {
+      cursor.color = [100, 100, 100, 100];
+      cursor.r = 40;
+      cursor.text = "";
+
+      count += 1;
+
+      let deathToday = 0;
+      particles.forEach(particle => {
+        if (Math.random() > 0.95 && particle.virus && !particle.died) {
+          particle.died = true;
+          deathToday += 1;
+        }
+      });
+      deathByDay.push(deathToday);
+
+      positions = positions.map(a => {
+        // if (particles.every(a => a.virus) && Math.random() > 0.3) {
+        //   return {
+        //     x: sk.mouseX + sk.random(-150, 50),
+        //     y: sk.mouseY + sk.random(-50, 150)
+        //   };
+        // }
+        if (Math.random() > 0.98) {
+          return {
+            ancient: { x: a.x, y: a.y },
+            x: sk.mouseX + sk.random(-50, 50),
+            y: sk.mouseY + sk.random(-50, 50)
+          };
+        }
+        if (Math.random() > 0.8) {
+          const distance = number;
+          let x = a.x + sk.random(-distance, distance);
+          let y = a.y + sk.random(-distance, distance);
+          x = x < 0 ? sk.random(0, sk.width) : x;
+          y = y < 0 ? sk.random(0, sk.height) : y;
+          return {
+            ancient: { x: a.x, y: a.y },
+            x,
+            y
+          };
+        }
+        if (Math.random() > 0.5 && a.ancient) {
+          return a.ancient;
+        }
+        return a;
+      });
     }
-
-    count += 1;
-
-    let deathToday = 0;
-    particles.forEach(particle => {
-      if (Math.random() > 0.95 && particle.virus && !particle.died) {
-        particle.died = true;
-        deathToday += 1;
-      }
-    });
-    deathByDay.push(deathToday);
-
-    positions = positions.map(a => {
-      // if (particles.every(a => a.virus) && Math.random() > 0.3) {
-      //   return {
-      //     x: sk.mouseX + sk.random(-150, 50),
-      //     y: sk.mouseY + sk.random(-50, 150)
-      //   };
-      // }
-      if (Math.random() > 0.98) {
-        return {
-          ancient: { x: a.x, y: a.y },
-          x: sk.mouseX + sk.random(-50, 50),
-          y: sk.mouseY + sk.random(-50, 50)
-        };
-      }
-      if (Math.random() > 0.8) {
-        const distance = number;
-        let x = a.x + sk.random(-distance, distance);
-        let y = a.y + sk.random(-distance, distance);
-        x = x < 0 ? sk.random(0, sk.width) : x;
-        y = y < 0 ? sk.random(0, sk.height) : y;
-        return {
-          ancient: { x: a.x, y: a.y },
-          x,
-          y
-        };
-      }
-      if (Math.random() > 0.5 && a.ancient) {
-        return a.ancient;
-      }
-      return a;
-    });
   };
 
   sk.keyPressed = () => {

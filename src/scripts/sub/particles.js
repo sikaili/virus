@@ -9,12 +9,8 @@ export default class Particle {
     this.updating = true;
     if (virus) {
       this.virus = true;
-      this.fill = [
-        Math.random() * 120,
-        Math.random() * 120,
-        Math.random() * 120,
-        255
-      ];
+      this.fill = virus;
+      this.r *= 2;
     }
   }
 
@@ -29,7 +25,10 @@ export default class Particle {
       ) {
         particle.virus = true;
         particle.mother = this;
-        particle.fill = [...this.fill.slice(0, 3), Math.abs(this.fill[3] - 30)];
+        particle.fill = [
+          ...this.fill.slice(0, 3),
+          Math.abs(this.fill[3] - 30) + 10
+        ];
       }
     });
   }

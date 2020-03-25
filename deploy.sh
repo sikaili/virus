@@ -4,7 +4,7 @@
 set -e
 
 # build
-# npm run build
+npm run build
 
 # navigate into the build output directory
 cd dist
@@ -21,11 +21,8 @@ git commit -m 'deploy'
 
 # if you are deploying to https://<USERNAME>.github.io/<REPO>
 git push -f git@github.com:sikaili/virus.git master:gh-pages
-
-cd -
 rm -Rf .git
-sudo cp -r dist/ ~/code/github_host/corogo
+cd -
+cp -r dist/ ~/code/github_host/corogo
 cd ~/code/github_host
-git add .
-git commit -m 'deploy'
-git push origin master
+sh deploy.sh
