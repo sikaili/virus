@@ -1,39 +1,6 @@
 import { Engine, World, Bodies, MouseConstraint } from "matter-js";
 import Particle from "./sub/particles";
 
-const engine = Engine.create();
-const setBordersAndMouse = sk => {
-  const border1 = Bodies.rectangle(0, 0, 10, 4000, {
-    isStatic: true
-  });
-  const border2 = Bodies.rectangle(sk.width, 0, 10, 4000, {
-    isStatic: true
-  });
-  const border3 = Bodies.rectangle(0, 0, 4000, 10, {
-    isStatic: true
-  });
-  const border4 = Bodies.rectangle(0, sk.height, 4000, 10, {
-    isStatic: true
-  });
-  const mouseConstraint = MouseConstraint.create(engine, {
-    constraint: {
-      stiffness: 0.2,
-      render: {
-        visible: false
-      }
-    }
-  });
-  World.add(engine.world, [
-    border1,
-    border2,
-    border3,
-    border4,
-    mouseConstraint
-  ]);
-};
-engine.world.gravity.y = 0;
-Engine.run(engine);
-
 const handleBodyClick = () => {
   if (typeof DeviceMotionEvent.requestPermission === "function") {
     DeviceMotionEvent.requestPermission()
@@ -59,7 +26,43 @@ const handleBodyClick = () => {
 
 const s = instance => {
   const sk = instance;
-  const { sampler, sampler2 } = s;
+
+  const setBordersAndMouse = () => {
+    const border1 = Bodies.rectangle(0, 0, 10, 4000, {
+      isStatic: true
+    });
+    const border2 = Bodies.rectangle(sk.width, 0, 10, 4000, {
+      isStatic: true
+    });
+    const border3 = Bodies.rectangle(0, 0, 4000, 10, {
+      isStatic: true
+    });
+    const border4 = Bodies.rectangle(0, sk.height, 4000, 10, {
+      isStatic: true
+    });
+    const mouseConstraint = MouseConstraint.create(engine, {
+      constraint: {
+        stiffness: 0.2,
+        render: {
+          visible: false
+        }
+      }
+    });
+    World.add(engine.world, [
+      border1,
+      border2,
+      border3,
+      border4,
+      mouseConstraint
+    ]);
+  };
+  const engine = Engine.create();
+  engine.world.gravity.y = 0;
+  sk.start = () => {
+    sk.loop();
+    Engine.run(engine);
+  };
+  // const { sampler, sampler2 } = s;
   // save and get last
 
   sk.lastKey = localStorage.getItem("last-key") || "notok";
@@ -87,16 +90,16 @@ const s = instance => {
   let count = 0;
   let touched = false;
   sk.setup = () => {
-    // sampler.triggerAttack("C3");
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
     setBordersAndMouse(sk);
     sk.scaleRef = (sk.width + sk.height) / 2;
+    // sk.noLoop();
     sk.background(0);
     sk.noStroke();
+    sk.strokeCap(sk.SQUARE);
     sk.rectMode(sk.CENTER);
     sk.textAlign(sk.CENTER);
     sk.textSize(40);
-    sk.strokeCap(sk.SQUARE);
     for (let i = 0; i < number; i += 1) {
       particles[i] = new Particle(
         sk.random(0, sk.width),
@@ -167,29 +170,28 @@ const s = instance => {
     */
   };
 
+  sk.addVirusMouse = () => {
+    const particle = new Particle(sk.mouseX, sk.mouseY, cursor.color, number);
+    particles.push(particle);
+    positions.push({ x: sk.mouseX, y: sk.mouseY });
+    World.add(engine.world, particle.body);
+    setTimeout(() => {
+      cursor.color = [
+        Math.random() * 120,
+        Math.random() * 120,
+        Math.random() * 120,
+        255
+      ];
+      cursor.text = `virus ${virusNo}`;
+    }, 600);
+  };
+
   sk.handleTouchEnd = ev => {
     touched = true;
-    // ev.preventDefault();
+    ev.preventDefault();
     if (virusNo > 0) {
-      const particle = new Particle(sk.mouseX, sk.mouseY, cursor.color, number);
-      particles.push(particle);
-      positions.push({ x: sk.mouseX, y: sk.mouseY });
-      World.add(engine.world, particle.body);
-
+      sk.addVirusMouse();
       virusNo -= 1;
-      setTimeout(() => {
-        cursor.color = [
-          Math.random() * 120,
-          Math.random() * 120,
-          Math.random() * 120,
-          255
-        ];
-        cursor.text = `virus ${virusNo}`;
-      }, 600);
-
-      positions = positions.map(a => {
-        return { x: a.x + sk.random(-30, 30), y: a.y + sk.random(-30, 30) };
-      });
     } else {
       cursor.color = [100, 100, 100, 100];
       cursor.r = 40;
@@ -201,19 +203,13 @@ const s = instance => {
       particles.forEach(particle => {
         if (Math.random() > 0.95 && particle.virus && !particle.died) {
           particle.died = true;
-          sampler2.triggerAttack("C3");
+          window.sampler2.triggerAttack("C3");
           deathToday += 1;
         }
       });
       deathByDay.push(deathToday);
 
       positions = positions.map(a => {
-        // if (particles.every(a => a.virus) && Math.random() > 0.3) {
-        //   return {
-        //     x: sk.mouseX + sk.random(-150, 50),
-        //     y: sk.mouseY + sk.random(-50, 150)
-        //   };
-        // }
         if (Math.random() > 0.98) {
           return {
             ancient: { x: a.x, y: a.y },
@@ -272,9 +268,9 @@ const s = instance => {
   };
 
   const setListeners = () => {
-    document
-      .querySelector("body")
-      .addEventListener("click", handleBodyClick, { once: true });
+    // document
+    //   .querySelector("body")
+    //   .addEventListener("click", handleBodyClick, { once: true });
 
     window.addEventListener("touchstart", sk.handleTouchEnd, {
       passive: false

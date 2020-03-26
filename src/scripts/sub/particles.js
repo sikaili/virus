@@ -17,7 +17,7 @@ export default class Particle {
     Body.setMass(this.body, 3 / scale);
   }
 
-  contagion(particles, sampler) {
+  contagion(particles) {
     particles.forEach(particle => {
       if (
         calDistance(
@@ -32,10 +32,8 @@ export default class Particle {
         Math.random() > 0.7 &&
         !this.updating
       ) {
+        if (this.fill[3] > 100) window.sampler.triggerAttack(this.fill[2]);
         setTimeout(() => {
-          // if (this.fill[3] > 100 && Math.random() > 0.8)
-          // synth.triggerAttackRelease(300, 1, 0.1);
-          if (this.fill[3] > 100) sampler.triggerAttack(this.fill[2]);
           particle.virus = true;
           particle.mother = this;
           particle.fill = [
@@ -98,7 +96,7 @@ export default class Particle {
         this.mother.body.position.x,
         this.mother.body.position.y
       );
-      sk.pop();
     }
+    sk.pop();
   }
 }

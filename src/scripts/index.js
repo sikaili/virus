@@ -6,13 +6,7 @@ import E3 from "../sound/chasing.mp3";
 import D3 from "../sound/light.mp3";
 
 // const distortion = new Tone.Distortion(0.1);
-const tremolo = new Tone.Tremolo(5, 0.6).start();
-const synth = new Tone.PolySynth(300, Tone.Synth, {
-  oscillator: {
-    type: "sine"
-  }
-}).chain(new Tone.Volume(-12), tremolo, Tone.Master);
-
+// const tremolo = new Tone.Tremolo(5, 0.6).start();
 const sampler = new Tone.Sampler(
   { E3 },
   {
@@ -20,7 +14,7 @@ const sampler = new Tone.Sampler(
       this.isLoaded = true;
     }
   }
-).chain(new Tone.Volume(-12), Tone.Master);
+).chain(new Tone.Volume(-14), Tone.Master);
 const sampler2 = new Tone.Sampler(
   { D3 },
   {
@@ -28,22 +22,20 @@ const sampler2 = new Tone.Sampler(
       this.isLoaded = true;
     }
   }
-).toMaster();
-virus.sampler = sampler;
-virus.sampler2 = sampler2;
-
-virus.synth = synth;
+).chain(new Tone.Volume(-6), Tone.Master);
+// virus.sampler = sampler;
+// virus.sampler2 = sampler2;
+window.sampler = sampler;
+window.sampler2 = sampler2;
 
 p5.disableFriendlyErrors = true;
-const canvas = new p5(virus); //eslint-disable-line
 
-document.querySelector("body").addEventListener(
+document.querySelector("html").addEventListener(
   "click",
   async () => {
     await Tone.start();
-    console.log("audio is ready"); //eslint-disable-line
+    const canvas = new p5(virus); //eslint-disable-line
+    canvas.start();
   },
   { once: true }
 );
-
-window.canvas = canvas;
