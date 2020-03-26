@@ -193,6 +193,9 @@ const s = instance => {
       sk.addVirusMouse();
       virusNo -= 1;
     } else {
+      if (Math.random() > 0.5) {
+        sk.addVirusMouse();
+      }
       cursor.color = [100, 100, 100, 100];
       cursor.r = 40;
       cursor.text = "";

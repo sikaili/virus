@@ -15,6 +15,12 @@ export default class Particle {
     }
     this.body = Bodies.circle(x, y, this.r / 1.5);
     Body.setMass(this.body, 3 / scale);
+    if (virus) {
+      Body.applyForce(this.body, this.body.position, {
+        x: Math.random() / 1000,
+        y: Math.random() / 1000
+      });
+    }
   }
 
   contagion(particles) {
@@ -29,10 +35,15 @@ export default class Particle {
           (this.r + particle.r) / 1.2 &&
         this.virus &&
         !particle.virus &&
-        Math.random() > 0.7 &&
-        !this.updating
+        Math.random() > 0.8 &&
+        !this.updating &&
+        !particle.immu
       ) {
         if (this.fill[3] > 100) window.sampler.triggerAttack(this.fill[2]);
+        Body.applyForce(this.body, this.body.position, {
+          x: Math.random() / 1000,
+          y: (this.fill[3] - 20) / 20000
+        });
         setTimeout(() => {
           particle.virus = true;
           particle.mother = this;
@@ -40,6 +51,17 @@ export default class Particle {
             ...this.fill.slice(0, 3),
             Math.abs(this.fill[3] - 30) + 10
           ];
+          setTimeout(() => {
+            if (Math.random() > 0.6) {
+              particle.virus = false;
+              if (Math.random() > 0.8) {
+                particle.immu = true;
+              }
+              setTimeout(() => {
+                particle.immu = false;
+              }, 3000);
+            }
+          }, 3000);
         }, (2000 / this.fill[3]) ** 2);
       }
     });
@@ -58,16 +80,24 @@ export default class Particle {
 
   display(sk) {
     // console.log(this.body.angularVelocity);
-    if (this.body.angularVelocity < 0.1) {
+    if (this.body.angularVelocity < 0.005) {
       this.updating = false;
     }
     if (this.died) {
       Body.applyForce(this.body, this.body.position, { x: 0, y: 0.01 });
+    } else if (this.immu) {
+      Body.applyForce(this.body, this.body.position, { x: 0, y: -0.0003 });
     }
     sk.push();
     sk.translate(this.body.position.x, this.body.position.y);
     sk.rotate(this.body.angle);
-    sk.fill(this.virus ? this.fill : [255, 255, 255, this.r * 3]);
+    sk.fill(
+      this.virus
+        ? this.fill
+        : this.immu
+        ? [255, 255, 255, sk.noise(this.body.position.y) * 255]
+        : [255, 255, 255, this.r * 3]
+    );
     if (this.died) {
       sk.fill(0);
       sk.rect(0, 0, this.r * 2);
