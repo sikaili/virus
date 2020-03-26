@@ -13,7 +13,7 @@ export default class Particle {
       this.fill = virus;
       this.r *= 2;
     }
-    this.body = Bodies.circle(x, y, this.r / 1.5);
+    this.body = Bodies.circle(x, y, this.r / 1.4);
     Body.setMass(this.body, 3 / scale);
     if (virus) {
       Body.applyForce(this.body, this.body.position, {
@@ -39,11 +39,14 @@ export default class Particle {
         !this.updating &&
         !particle.immu
       ) {
-        if (this.fill[3] > 100) window.sampler.triggerAttack(this.fill[2]);
-        Body.applyForce(this.body, this.body.position, {
-          x: Math.random() / 1000,
-          y: (this.fill[3] - 20) / 20000
-        });
+        window.sampler.volume.value = -3 - 300 / (this.r + this.fill[3] / 5);
+        // console.log(window.sampler.volume.value);
+        if (this.fill[3] > 200 && window.sampler.volume.value > -20)
+          window.sampler.triggerAttack(this.fill[2]);
+        // Body.applyForce(this.body, this.body.position, {
+        //   x: Math.random() / 1000,
+        //   y: (this.fill[3] - 20) / 20000
+        // });
         setTimeout(() => {
           particle.virus = true;
           particle.mother = this;
@@ -91,13 +94,15 @@ export default class Particle {
     sk.push();
     sk.translate(this.body.position.x, this.body.position.y);
     sk.rotate(this.body.angle);
-    sk.fill(
-      this.virus
-        ? this.fill
-        : this.immu
-        ? [255, 255, 255, sk.noise(this.body.position.y) * 255]
-        : [255, 255, 255, this.r * 3]
-    );
+
+    if (this.virus) {
+      sk.fill(this.fill);
+    } else if (this.immu) {
+      sk.fill([255, 255, 255, sk.noise(this.body.position.y) * 255]);
+    } else {
+      sk.fill([255, 255, 255, this.r * 3]);
+    }
+
     if (this.died) {
       sk.fill(0);
       sk.rect(0, 0, this.r * 2);

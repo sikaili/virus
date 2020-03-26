@@ -187,9 +187,9 @@ const s = instance => {
   };
 
   sk.handleTouchEnd = ev => {
-    touched = true;
+    touched = false;
     ev.preventDefault();
-    if (virusNo > 0) {
+    if (virusNo > 0 && sk.mouseX + sk.mouseY > 10) {
       sk.addVirusMouse();
       virusNo -= 1;
     } else {
@@ -206,7 +206,7 @@ const s = instance => {
       particles.forEach(particle => {
         if (Math.random() > 0.95 && particle.virus && !particle.died) {
           particle.died = true;
-          window.sampler2.triggerAttack("C3");
+          window.sampler2.triggerAttack(130 + particle.r - 20);
           deathToday += 1;
         }
       });
@@ -275,22 +275,29 @@ const s = instance => {
     //   .querySelector("body")
     //   .addEventListener("click", handleBodyClick, { once: true });
 
-    window.addEventListener("touchstart", sk.handleTouchEnd, {
-      passive: false
-    });
     window.addEventListener(
-      "touchend",
+      "touchstart",
       () => {
-        touched = false;
+        touched = true;
       },
       {
         passive: false
       }
     );
 
-    window.addEventListener("mousedown", sk.handleTouchEnd, {
+    window.addEventListener("touchend", sk.handleTouchEnd, {
       passive: false
     });
+
+    window.addEventListener(
+      "mousedown",
+      () => {
+        touched = true;
+      },
+      {
+        passive: false
+      }
+    );
     window.addEventListener(
       "mouseup",
       () => {

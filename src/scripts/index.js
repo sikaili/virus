@@ -22,7 +22,7 @@ const sampler2 = new Tone.Sampler(
       this.isLoaded = true;
     }
   }
-).chain(new Tone.Volume(-6), Tone.Master);
+).chain(new Tone.Volume(-10), Tone.Master);
 // virus.sampler = sampler;
 // virus.sampler2 = sampler2;
 window.sampler = sampler;
