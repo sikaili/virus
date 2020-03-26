@@ -59,7 +59,7 @@ const handleBodyClick = () => {
 
 const s = instance => {
   const sk = instance;
-  const { synth, sampler, sampler2 } = s;
+  const { sampler, sampler2 } = s;
   // save and get last
 
   sk.lastKey = localStorage.getItem("last-key") || "notok";
@@ -247,7 +247,6 @@ const s = instance => {
         sk.saveCapture();
         break;
       case 78:
-        Tone.Transport.toggle();
         if (looping) {
           sk.noLoop();
           looping = !looping;
