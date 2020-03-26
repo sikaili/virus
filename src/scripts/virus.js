@@ -125,11 +125,11 @@ const s = instance => {
       }
       particle.display(sk);
     });
-    /*
     // curso
     sk.push();
-    sk.fill(cursor.color);
+    sk.fill([...cursor.color.slice(0, 3), 100]);
     sk.ellipse(sk.mouseX, sk.mouseY, cursor.r);
+    /*
     sk.textSize(15);
     sk.fill(255);
     sk.text(cursor.text, sk.mouseX, sk.mouseY);
@@ -180,12 +180,10 @@ const s = instance => {
     positions.push({ x: sk.mouseX, y: sk.mouseY });
     World.add(engine.world, particle.body);
     setTimeout(() => {
-      cursor.color = [
-        Math.random() * 120,
-        Math.random() * 120,
-        Math.random() * 120,
-        255
-      ];
+      cursor.color =
+        virusNo > 0
+          ? [Math.random() * 120, Math.random() * 120, Math.random() * 120, 255]
+          : [100, 100, 100, 100];
       cursor.text = `virus ${virusNo}`;
     }, 50);
   };
@@ -198,7 +196,6 @@ const s = instance => {
       virusNo -= 1;
     } else {
       cursor = { color: [100, 100, 100, 100], r: 40, text: "" };
-
       dayCount += 1;
 
       let deathToday = 0;

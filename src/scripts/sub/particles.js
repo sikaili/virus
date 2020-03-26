@@ -68,7 +68,7 @@ export default class Particle {
               window.sampler2.triggerAttack(130 + (particle.r - 20) * 2);
             }
           }, 3000);
-        }, (2000 / this.fill[3]) ** 2);
+        }, (1500 / this.fill[3]) ** 2);
       }
     });
   }
