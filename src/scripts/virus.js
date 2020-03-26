@@ -78,16 +78,16 @@ const s = instance => {
   let looping = true;
 
   const particles = [];
-  let positions = [];
+  const positions = [];
   let virusNo = 3;
   const deathByDay = [];
   const number = 230;
-  const cursor = {
+  let cursor = {
     color: [Math.random() * 120, Math.random() * 120, Math.random() * 120, 255],
     r: 80,
     text: `virus ${virusNo}`
   };
-  let count = 0;
+  let dayCount = 0;
   let touched = false;
   sk.setup = () => {
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
@@ -118,7 +118,7 @@ const s = instance => {
     sk.noFill();
     particles.forEach(particle => {
       if (!particle.updating) {
-        particle.contagion(particles, sampler);
+        particle.contagion(particles);
       }
       if (touched) {
         particle.changePos();
@@ -161,7 +161,7 @@ const s = instance => {
     if (virusNo > 0) {
       text = `place patient 0`;
     } else {
-      text = `${count} Days\n${(
+      text = `${dayCount} Days\n${(
         (particles.filter(a => a.virus).length / particles.length) *
         100
       ).toFixed(2)}%\n${particles.filter(a => !a.died).length} Left`;
@@ -171,7 +171,11 @@ const s = instance => {
   };
 
   sk.addVirusMouse = () => {
-    const particle = new Particle(sk.mouseX, sk.mouseY, cursor.color, number);
+    const virus = {
+      color: cursor.color,
+      id: virusNo - 1
+    };
+    const particle = new Particle(sk.mouseX, sk.mouseY, virus, number);
     particles.push(particle);
     positions.push({ x: sk.mouseX, y: sk.mouseY });
     World.add(engine.world, particle.body);
@@ -183,7 +187,7 @@ const s = instance => {
         255
       ];
       cursor.text = `virus ${virusNo}`;
-    }, 600);
+    }, 50);
   };
 
   sk.handleTouchEnd = ev => {
@@ -193,50 +197,21 @@ const s = instance => {
       sk.addVirusMouse();
       virusNo -= 1;
     } else {
-      if (Math.random() > 0.5) {
-        sk.addVirusMouse();
-      }
-      cursor.color = [100, 100, 100, 100];
-      cursor.r = 40;
-      cursor.text = "";
+      cursor = { color: [100, 100, 100, 100], r: 40, text: "" };
 
-      count += 1;
+      dayCount += 1;
 
       let deathToday = 0;
+
+      // dead by click
       particles.forEach(particle => {
         if (Math.random() > 0.95 && particle.virus && !particle.died) {
           particle.died = true;
-          window.sampler2.triggerAttack(130 + particle.r - 20);
+          window.sampler2.triggerAttack(130 + (particle.r - 20) * 2);
           deathToday += 1;
         }
       });
       deathByDay.push(deathToday);
-
-      positions = positions.map(a => {
-        if (Math.random() > 0.98) {
-          return {
-            ancient: { x: a.x, y: a.y },
-            x: sk.mouseX + sk.random(-50, 50),
-            y: sk.mouseY + sk.random(-50, 50)
-          };
-        }
-        if (Math.random() > 0.8) {
-          const distance = number;
-          let x = a.x + sk.random(-distance, distance);
-          let y = a.y + sk.random(-distance, distance);
-          x = x < 0 ? sk.random(0, sk.width) : x;
-          y = y < 0 ? sk.random(0, sk.height) : y;
-          return {
-            ancient: { x: a.x, y: a.y },
-            x,
-            y
-          };
-        }
-        if (Math.random() > 0.5 && a.ancient) {
-          return a.ancient;
-        }
-        return a;
-      });
     }
   };
 
@@ -298,15 +273,9 @@ const s = instance => {
         passive: false
       }
     );
-    window.addEventListener(
-      "mouseup",
-      () => {
-        touched = false;
-      },
-      {
-        passive: false
-      }
-    );
+    window.addEventListener("mouseup", sk.handleTouchEnd, {
+      passive: false
+    });
     document.addEventListener(
       "ontouchmove",
       m => {

@@ -10,8 +10,9 @@ export default class Particle {
     this.updating = true;
     if (virus) {
       this.virus = true;
-      this.fill = virus;
+      this.fill = virus.color;
       this.r *= 2;
+      this.id = virus.id;
     }
     this.body = Bodies.circle(x, y, this.r / 1.4);
     Body.setMass(this.body, 3 / scale);
@@ -39,30 +40,32 @@ export default class Particle {
         !this.updating &&
         !particle.immu
       ) {
-        window.sampler.volume.value = -3 - 300 / (this.r + this.fill[3] / 5);
-        // console.log(window.sampler.volume.value);
-        if (this.fill[3] > 200 && window.sampler.volume.value > -20)
-          window.sampler.triggerAttack(this.fill[2]);
-        // Body.applyForce(this.body, this.body.position, {
-        //   x: Math.random() / 1000,
-        //   y: (this.fill[3] - 20) / 20000
-        // });
+        if (this.fill[3] > 200 && this.id) {
+          window.samplers[this.id].volume.value =
+            -3 - 100 / (this.r + this.fill[3] / 5);
+          window.samplers[this.id].triggerAttack(this.fill[2]);
+        }
         setTimeout(() => {
+          particle.id = this.id;
           particle.virus = true;
-          particle.mother = this;
+          particle.mother = { position: this.body.position };
           particle.fill = [
             ...this.fill.slice(0, 3),
             Math.abs(this.fill[3] - 30) + 10
           ];
           setTimeout(() => {
-            if (Math.random() > 0.6) {
+            if (Math.random() > 0.7) {
               particle.virus = false;
-              if (Math.random() > 0.8) {
+              if (Math.random() > 0.6 && particle.fill[3] < 150) {
                 particle.immu = true;
               }
               setTimeout(() => {
                 particle.immu = false;
               }, 3000);
+            }
+            if (Math.random() > 0.97 && particle.fill[3] > 100) {
+              particle.died = true;
+              window.sampler2.triggerAttack(130 + (particle.r - 20) * 2);
             }
           }, 3000);
         }, (2000 / this.fill[3]) ** 2);
@@ -116,9 +119,9 @@ export default class Particle {
     if (
       this.mother &&
       calDistance(
-        this.mother.body.position.x,
+        this.mother.position.x,
         this.body.position.x,
-        this.mother.body.position.y,
+        this.mother.position.y,
         this.body.position.y
       ) <
         this.r * 3
@@ -128,8 +131,8 @@ export default class Particle {
       sk.line(
         this.body.position.x,
         this.body.position.y,
-        this.mother.body.position.x,
-        this.mother.body.position.y
+        this.mother.position.x,
+        this.mother.position.y
       );
     }
     sk.pop();

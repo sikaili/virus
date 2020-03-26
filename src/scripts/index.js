@@ -7,14 +7,6 @@ import D3 from "../sound/light.mp3";
 
 // const distortion = new Tone.Distortion(0.1);
 // const tremolo = new Tone.Tremolo(5, 0.6).start();
-const sampler = new Tone.Sampler(
-  { E3 },
-  {
-    onload: () => {
-      this.isLoaded = true;
-    }
-  }
-).chain(new Tone.Volume(-14), Tone.Master);
 const sampler2 = new Tone.Sampler(
   { D3 },
   {
@@ -25,7 +17,17 @@ const sampler2 = new Tone.Sampler(
 ).chain(new Tone.Volume(-10), Tone.Master);
 // virus.sampler = sampler;
 // virus.sampler2 = sampler2;
-window.sampler = sampler;
+window.samplers = [];
+for (let i = 0; i < 3; i++) {
+  window.samplers[i] = new Tone.Sampler(
+    { E3 },
+    {
+      onload: () => {
+        this.isLoaded = true;
+      }
+    }
+  ).chain(new Tone.Volume(-14), Tone.Master);
+}
 window.sampler2 = sampler2;
 
 p5.disableFriendlyErrors = true;
