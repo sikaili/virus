@@ -85,11 +85,11 @@ export default class Particle {
   }
 
   changePos() {
-    if (Math.random() > 0.5) {
+    if (Math.random() > 0.3) {
       this.updating = true;
       const force = {
-        x: (Math.random() - 0.5) * 0.03,
-        y: (Math.random() - 0.5) * 0.03
+        x: (Math.random() - 0.5) * 0.05,
+        y: (Math.random() - 0.5) * 0.06
       };
       Body.applyForce(this.body, this.body.position, force);
     }

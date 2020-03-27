@@ -83,7 +83,7 @@ const s = instance => {
   const positions = [];
   let virusNo = 3;
   const deathByDay = [];
-  const number = 230;
+  const number = 250;
   let cursor = {
     color: [Math.random() * 120, Math.random() * 120, Math.random() * 120, 255],
     r: 80,
@@ -182,9 +182,10 @@ const s = instance => {
     positions.push({ x: sk.mouseX, y: sk.mouseY });
     World.add(engine.world, particle.body);
     setTimeout(() => {
+      // random to 120 is good
       cursor.color =
         virusNo > 0
-          ? [Math.random() * 120, Math.random() * 120, Math.random() * 120, 255]
+          ? [Math.random() * 150, Math.random() * 150, Math.random() * 150, 255]
           : [100, 100, 100, 100];
       cursor.text = `virus ${virusNo}`;
     }, 50);
