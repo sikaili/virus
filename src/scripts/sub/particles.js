@@ -100,16 +100,15 @@ export default class Particle {
 
     if (this.virus) {
       sk.fill(this.fill);
+      sk.ellipse(0, 0, this.r * 2);
     } else if (this.immu) {
-      sk.fill([255, 255, 255, sk.noise(this.body.position.y) * 255]);
-    } else {
-      sk.fill([255, 255, 255, this.r * 3]);
-    }
-
-    if (this.died) {
+      sk.fill([255, 255, 255, sk.noise(this.body.position.y / 15) * 255]);
+      sk.ellipse(0, 0, this.r * 2);
+    } else if (this.died) {
       sk.fill(0);
       sk.rect(0, 0, this.r * 2);
     } else {
+      sk.fill([255, 255, 255, this.r * 3]);
       sk.ellipse(0, 0, this.r * 2);
     }
     sk.stroke(255, this.r * 3);

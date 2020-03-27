@@ -27,6 +27,7 @@ const handleBodyClick = () => {
 const s = instance => {
   const sk = instance;
 
+  const engine = Engine.create();
   const setBordersAndMouse = () => {
     const border1 = Bodies.rectangle(0, 0, 10, 4000, {
       isStatic: true
@@ -56,11 +57,12 @@ const s = instance => {
       mouseConstraint
     ]);
   };
-  const engine = Engine.create();
   engine.world.gravity.y = 0;
+
   sk.start = () => {
     sk.loop();
     Engine.run(engine);
+    document.querySelector(".landing").style.display = "none";
   };
   // const { sampler, sampler2 } = s;
   // save and get last
@@ -204,6 +206,7 @@ const s = instance => {
       particles.forEach(particle => {
         if (Math.random() > 0.95 && particle.virus && !particle.died) {
           particle.died = true;
+
           window.sampler2.triggerAttack(130 + (particle.r - 20) * 2);
           deathToday += 1;
         }
