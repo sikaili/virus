@@ -26,14 +26,15 @@ export default class Particle {
 
   contagion(particles) {
     particles.forEach(particle => {
+      const distance = calDistance(
+        particle.body.position.x,
+        this.body.position.x,
+        particle.body.position.y,
+        this.body.position.y
+      );
+      // contagion
       if (
-        calDistance(
-          particle.body.position.x,
-          this.body.position.x,
-          particle.body.position.y,
-          this.body.position.y
-        ) <
-          (this.r + particle.r) / 1.2 &&
+        distance < (this.r + particle.r) / 1.2 &&
         this.virus &&
         !particle.virus &&
         Math.random() > 0.8 &&
@@ -69,6 +70,16 @@ export default class Particle {
             }
           }, 3000);
         }, (1500 / this.fill[3]) ** 2);
+        // virus vs virus
+      } else if (
+        distance < (this.r + particle.r) / 1.2 &&
+        this.virus &&
+        particle.virus &&
+        particle.id !== this.id
+      ) {
+        particle.fill = particle.fill.map(
+          (color, index) => (color + this.fill[index]) / 2
+        );
       }
     });
   }
