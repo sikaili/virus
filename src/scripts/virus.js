@@ -221,7 +221,15 @@ const s = instance => {
         await Tone.start();
         sk.start();
       },
-      { once: true }
+      { once: true, passive: false }
+    );
+    divNode.addEventListener(
+      "touchstart",
+      async () => {
+        await Tone.start();
+        sk.start();
+      },
+      { once: true, passive: false }
     );
     divNode.addEventListener(
       "touchstart",

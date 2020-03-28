@@ -1,4 +1,3 @@
-import "../styles/index.scss";
 import * as p5 from "p5";
 import virus from "./virus";
 
