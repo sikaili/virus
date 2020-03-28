@@ -24,7 +24,7 @@ export default class Particle {
     }
   }
 
-  contagion(particles) {
+  contagion(particles, samplers, sampler2) {
     particles.forEach(particle => {
       const distance = calDistance(
         particle.body.position.x,
@@ -42,9 +42,9 @@ export default class Particle {
         !particle.immu
       ) {
         if (this.fill[3] > 200 && this.id) {
-          window.samplers[this.id].volume.value =
+          samplers[this.id].volume.value =
             -3 - 100 / (this.r + this.fill[3] / 5);
-          window.samplers[this.id].triggerAttack(this.fill[2]);
+          samplers[this.id].triggerAttack(this.fill[2]);
         }
         setTimeout(() => {
           particle.id = this.id;
@@ -66,7 +66,7 @@ export default class Particle {
             }
             if (Math.random() > 0.97 && particle.fill[3] > 100) {
               particle.died = true;
-              window.sampler2.triggerAttack(130 + (particle.r - 20) * 2);
+              sampler2.triggerAttack(130 + (particle.r - 20) * 2);
             }
           }, 3000);
         }, (1500 / this.fill[3]) ** 2);

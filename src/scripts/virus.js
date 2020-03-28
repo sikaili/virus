@@ -1,29 +1,6 @@
 import { Engine, World, Bodies, MouseConstraint } from "matter-js";
 import Particle from "./sub/particles";
 
-const handleBodyClick = () => {
-  if (typeof DeviceMotionEvent.requestPermission === "function") {
-    DeviceMotionEvent.requestPermission()
-      .then(permissionState => {
-        if (permissionState === "granted") {
-          divNode.addEventListener("deviceorientation", e => {
-            engine.world.gravity.x = e.gamma / 90;
-            const arr = ["alpha", "beta", "gamma"];
-            arr.map(a => {
-              document.createElement("p");
-            });
-            document.querySelectors("p").map((a, i) => {
-              a.innerHtml = e[arr[i]];
-            });
-          });
-        }
-      })
-      .catch(console.error);
-  } else {
-    // handle regular non iOS 13+ devices
-  }
-};
-
 const s = instance => {
   const sk = instance;
   const divNode = document.querySelector("#canvasContainer");
@@ -64,9 +41,9 @@ const s = instance => {
     Engine.run(engine);
     document.querySelector(".landing").style.display = "none";
   };
-  // const { sampler, sampler2 } = s;
-  // save and get last
 
+  const { samplers, sampler2 } = s;
+  // save and get last
   sk.lastKey = localStorage.getItem("last-key") || "notok";
   sk.thisKey = `OK${Date()}`;
   sk.get = (key = sk.lastKey) => {
@@ -89,7 +66,6 @@ const s = instance => {
     r: 80,
     text: `virus ${virusNo}`
   };
-  let dayCount = 0;
   let touched = false;
   sk.setup = () => {
     sk.createCanvas(sk.windowWidth, sk.windowHeight);
@@ -120,7 +96,7 @@ const s = instance => {
     sk.noFill();
     particles.forEach(particle => {
       if (!particle.updating) {
-        particle.contagion(particles);
+        particle.contagion(particles, samplers, sampler2);
       }
       if (touched) {
         particle.changePos();
@@ -131,48 +107,9 @@ const s = instance => {
     sk.push();
     sk.fill([...cursor.color.slice(0, 3), 100]);
     sk.ellipse(sk.mouseX, sk.mouseY, cursor.r);
-    /*
-    sk.textSize(15);
-    sk.fill(255);
-    sk.text(cursor.text, sk.mouseX, sk.mouseY);
-    sk.pop();
-    // graph
-    sk.push();
-    for (let i = 0; i < deathByDay.length; i += 1) {
-      sk.stroke(0, 180);
-      sk.strokeWeight(10);
-      const x = 20 + i * 10;
-      sk.textSize(5);
-      sk.line(
-        x,
-        sk.height - ((deathByDay[i] * 8) / number) * 250,
-        x,
-        sk.height
-      );
-      sk.noStroke();
-      sk.fill(255, 125, 125, 220);
-      sk.text(i, x, sk.height - 5);
-    }
-    sk.textSize(10);
-    sk.fill(100);
-    sk.text("plot: deaths/day", sk.width / 2, sk.height - 15);
-    sk.pop();
-    // text
-    sk.fill(255, 125, 125, 220);
-    let text;
-    if (virusNo > 0) {
-      text = `place patient 0`;
-    } else {
-      text = `${dayCount} Days\n${(
-        (particles.filter(a => a.virus).length / particles.length) *
-        100
-      ).toFixed(2)}%\n${particles.filter(a => !a.died).length} Left`;
-    }
-    sk.text(text, sk.width / 2, sk.height * 0.7 - 50);
-    */
   };
 
-  sk.addVirusMouse = () => {
+  sk.addVirus = () => {
     const virus = {
       color: cursor.color,
       id: virusNo - 1
@@ -201,20 +138,17 @@ const s = instance => {
     touched = false;
     ev.preventDefault();
     if (virusNo > 0 && sk.mouseX + sk.mouseY > 10) {
-      sk.addVirusMouse();
+      sk.addVirus();
       virusNo -= 1;
     } else {
       cursor = { color: [100, 100, 100, 100], r: 40, text: "" };
-      dayCount += 1;
-
       let deathToday = 0;
 
       // dead by click
       particles.forEach(particle => {
         if (Math.random() > 0.95 && particle.virus && !particle.died) {
           particle.died = true;
-
-          window.sampler2.triggerAttack(130 + (particle.r - 20) * 2);
+          sampler2.triggerAttack(130 + (particle.r - 20) * 2);
           deathToday += 1;
         }
       });
@@ -252,13 +186,19 @@ const s = instance => {
     sk.resizeCanvas(sk.windowWidth, sk.windowHeight);
   };
 
-  const setListeners = () => {
-    // document
-    //   .querySelector("body")
-    //   .addEventListener("click", handleBodyClick, { once: true });
-
+  const setListeners = (divNode, sk) => { //eslint-disable-line
     divNode.addEventListener(
       "touchstart",
+      () => {
+        touched = true;
+      },
+      {
+        passive: false
+      }
+    );
+
+    divNode.addEventListener(
+      "mousedown",
       () => {
         touched = true;
       },
@@ -271,18 +211,10 @@ const s = instance => {
       passive: false
     });
 
-    divNode.addEventListener(
-      "mousedown",
-      () => {
-        touched = true;
-      },
-      {
-        passive: false
-      }
-    );
     divNode.addEventListener("mouseup", sk.handleTouchEnd, {
       passive: false
     });
+
     divNode.addEventListener(
       "ontouchmove",
       m => {
@@ -290,6 +222,7 @@ const s = instance => {
       },
       { passive: false }
     );
+
     divNode.addEventListener(
       "touchmove",
       ev => {
@@ -298,7 +231,8 @@ const s = instance => {
       { passive: false }
     );
   };
-  setListeners();
+
+  setListeners(divNode, sk);
 };
 
 export default s;
