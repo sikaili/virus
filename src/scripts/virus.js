@@ -1,5 +1,28 @@
+import * as Tone from "tone";
 import { Engine, World, Bodies, MouseConstraint } from "matter-js";
+import E3 from "../sound/chasing.mp3";
+import D3 from "../sound/light.mp3";
 import Particle from "./sub/particles";
+
+const sampler2 = new Tone.Sampler(
+  { D3 },
+  {
+    onload: () => {
+      this.isLoaded = true;
+    }
+  }
+).chain(new Tone.Volume(-10), Tone.Master);
+const samplers = [];
+for (let i = 0; i < 3; i += 1) {
+  samplers[i] = new Tone.Sampler(
+    { E3 },
+    {
+      onload: () => {
+        this.isLoaded = true;
+      }
+    }
+  ).chain(new Tone.Volume(-14), Tone.Master);
+}
 
 const s = instance => {
   const sk = instance;
@@ -39,16 +62,15 @@ const s = instance => {
   sk.start = () => {
     sk.loop();
     Engine.run(engine);
-    document.querySelector(".landing").style.display = "none";
   };
 
   sk.stop = () => {
     World.clear(engine.world);
     Engine.clear(engine);
+    Tone.context.close();
     sk.remove();
   };
 
-  const { samplers, sampler2 } = s;
   // save and get last
   sk.lastKey = localStorage.getItem("last-key") || "notok";
   sk.thisKey = `OK${Date()}`;
@@ -193,6 +215,14 @@ const s = instance => {
   };
 
   const setListeners = (divNode, sk) => { //eslint-disable-line
+    divNode.addEventListener(
+      "click",
+      async () => {
+        await Tone.start();
+        sk.start();
+      },
+      { once: true }
+    );
     divNode.addEventListener(
       "touchstart",
       () => {
