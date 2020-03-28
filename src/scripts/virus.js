@@ -6,7 +6,7 @@ const handleBodyClick = () => {
     DeviceMotionEvent.requestPermission()
       .then(permissionState => {
         if (permissionState === "granted") {
-          window.addEventListener("deviceorientation", e => {
+          divNode.addEventListener("deviceorientation", e => {
             engine.world.gravity.x = e.gamma / 90;
             const arr = ["alpha", "beta", "gamma"];
             arr.map(a => {
@@ -26,7 +26,7 @@ const handleBodyClick = () => {
 
 const s = instance => {
   const sk = instance;
-
+  const divNode = document.querySelector("#canvasContainer");
   const engine = Engine.create();
   const setBordersAndMouse = () => {
     const border1 = Bodies.rectangle(0, 0, 10, 4000, {
@@ -183,9 +183,15 @@ const s = instance => {
     World.add(engine.world, particle.body);
     setTimeout(() => {
       // random to 120 is good
+      const scale = Math.random() * 255;
       cursor.color =
         virusNo > 0
-          ? [Math.random() * 150, Math.random() * 150, Math.random() * 150, 255]
+          ? [
+              Math.random() * scale,
+              Math.random() * scale,
+              Math.random() * scale,
+              255
+            ]
           : [100, 100, 100, 100];
       cursor.text = `virus ${virusNo}`;
     }, 50);
@@ -251,7 +257,7 @@ const s = instance => {
     //   .querySelector("body")
     //   .addEventListener("click", handleBodyClick, { once: true });
 
-    window.addEventListener(
+    divNode.addEventListener(
       "touchstart",
       () => {
         touched = true;
@@ -261,11 +267,11 @@ const s = instance => {
       }
     );
 
-    window.addEventListener("touchend", sk.handleTouchEnd, {
+    divNode.addEventListener("touchend", sk.handleTouchEnd, {
       passive: false
     });
 
-    window.addEventListener(
+    divNode.addEventListener(
       "mousedown",
       () => {
         touched = true;
@@ -274,17 +280,17 @@ const s = instance => {
         passive: false
       }
     );
-    window.addEventListener("mouseup", sk.handleTouchEnd, {
+    divNode.addEventListener("mouseup", sk.handleTouchEnd, {
       passive: false
     });
-    document.addEventListener(
+    divNode.addEventListener(
       "ontouchmove",
       m => {
         m.preventDefault();
       },
       { passive: false }
     );
-    document.addEventListener(
+    divNode.addEventListener(
       "touchmove",
       ev => {
         ev.preventDefault();

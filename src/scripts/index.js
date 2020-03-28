@@ -18,7 +18,7 @@ const sampler2 = new Tone.Sampler(
 // virus.sampler = sampler;
 // virus.sampler2 = sampler2;
 window.samplers = [];
-for (let i = 0; i < 3; i++) {
+for (let i = 0; i < 3; i += 1) {
   window.samplers[i] = new Tone.Sampler(
     { E3 },
     {
@@ -29,14 +29,12 @@ for (let i = 0; i < 3; i++) {
   ).chain(new Tone.Volume(-14), Tone.Master);
 }
 window.sampler2 = sampler2;
-
 p5.disableFriendlyErrors = true;
-
 document.querySelector("html").addEventListener(
   "click",
   async () => {
     await Tone.start();
-    const canvas = new p5(virus); //eslint-disable-line
+    let canvas = new p5(virus, 'canvasContainer'); //eslint-disable-line
     canvas.start();
   },
   { once: true }
