@@ -31,12 +31,23 @@ document.querySelector("html").addEventListener(
   "click",
   async () => {
     await Tone.start();
-    let canvas = new p5(virus, 'canvasContainer'); //eslint-disable-line
-    canvas.start();
   },
   { once: true }
 );
+let canvas = new p5(virus, 'canvasContainer'); //eslint-disable-line
+canvas.start();
 
+const stop = () => {
+  canvas.stop();
+  Object.entries(canvas).map(prop => delete canvas[prop]);
+  Tone.context.close();
+};
+
+setTimeout(() => {
+  stop();
+}, 3000);
+
+export { stop };
 // cosnt handleBodyClick = () => {
 //   if (typeof DeviceMotionEvent.requestPermission === "function") {
 //     DeviceMotionEvent.requestPermission()

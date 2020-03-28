@@ -42,6 +42,12 @@ const s = instance => {
     document.querySelector(".landing").style.display = "none";
   };
 
+  sk.stop = () => {
+    World.clear(engine.world);
+    Engine.clear(engine);
+    sk.remove();
+  };
+
   const { samplers, sampler2 } = s;
   // save and get last
   sk.lastKey = localStorage.getItem("last-key") || "notok";
