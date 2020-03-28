@@ -1,6 +1,28 @@
 import { Bodies, Body } from "matter-js";
+import Tone from "tone";
 import calDistance from "../utils/calDistance";
+import E3 from "../../sound/chasing.mp3";
+import D3 from "../../sound/light.mp3";
 
+const sampler2 = new Tone.Sampler(
+  { D3 },
+  {
+    onload: () => {
+      this.isLoaded = true;
+    }
+  }
+).chain(new Tone.Volume(-12), Tone.Master);
+const samplers = [];
+for (let i = 0; i < 3; i += 1) {
+  samplers[i] = new Tone.Sampler(
+    { E3 },
+    {
+      onload: () => {
+        this.isLoaded = true;
+      }
+    }
+  ).chain(new Tone.Volume(-15), Tone.Master);
+}
 export default class Particle {
   constructor(x, y, virus, number) {
     const scale = 200 / number;
@@ -24,7 +46,7 @@ export default class Particle {
     }
   }
 
-  contagion(particles, samplers, sampler2) {
+  contagion(particles) {
     particles.forEach(particle => {
       const distance = calDistance(
         particle.body.position.x,
@@ -47,13 +69,7 @@ export default class Particle {
           samplers[this.id].triggerAttack(this.fill[2]);
         }
         setTimeout(() => {
-          particle.id = this.id;
-          particle.virus = true;
-          particle.mother = { position: this.body.position };
-          particle.fill = [
-            ...this.fill.slice(0, 3),
-            Math.abs(this.fill[3] - 30) + 10
-          ];
+          particle = this.infection(particle);
           setTimeout(() => {
             if (Math.random() > 0.7) {
               particle.virus = false;
@@ -82,6 +98,21 @@ export default class Particle {
         );
       }
     });
+  }
+
+  infection(particle) {
+    particle.id = this.id;
+    particle.virus = true;
+    particle.mother = { position: this.body.position };
+    particle.fill = [
+      ...this.fill.slice(0, 3),
+      Math.abs(this.fill[3] - 30) + 10
+    ];
+    return particle;
+  }
+
+  triggerAttack() {
+    sampler2.triggerAttack(130 + (this.r - 20) * 2);
   }
 
   changePos() {

@@ -3,7 +3,6 @@ import virus from "./virus";
 
 p5.disableFriendlyErrors = true;
 let canvas = new p5(virus, 'canvasContainer'); //eslint-disable-line
-
 // cosnt handleBodyClick = () => {
 //   if (typeof DeviceMotionEvent.requestPermission === "function") {
 //     DeviceMotionEvent.requestPermission()

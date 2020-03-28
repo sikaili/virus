@@ -1,28 +1,6 @@
-import * as Tone from "tone";
+import Tone from "tone";
 import { Engine, World, Bodies, MouseConstraint } from "matter-js";
-import E3 from "../sound/chasing.mp3";
-import D3 from "../sound/light.mp3";
 import Particle from "./sub/particles";
-
-const sampler2 = new Tone.Sampler(
-  { D3 },
-  {
-    onload: () => {
-      this.isLoaded = true;
-    }
-  }
-).chain(new Tone.Volume(-10), Tone.Master);
-const samplers = [];
-for (let i = 0; i < 3; i += 1) {
-  samplers[i] = new Tone.Sampler(
-    { E3 },
-    {
-      onload: () => {
-        this.isLoaded = true;
-      }
-    }
-  ).chain(new Tone.Volume(-14), Tone.Master);
-}
 
 const s = instance => {
   const sk = instance;
@@ -106,6 +84,8 @@ const s = instance => {
     sk.rectMode(sk.CENTER);
     sk.textAlign(sk.CENTER);
     sk.textSize(40);
+    sk.mouseX = sk.width / 2;
+    sk.mouseY = sk.height / 2;
     for (let i = 0; i < number; i += 1) {
       particles[i] = new Particle(
         sk.random(0, sk.width),
@@ -124,7 +104,7 @@ const s = instance => {
     sk.noFill();
     particles.forEach(particle => {
       if (!particle.updating) {
-        particle.contagion(particles, samplers, sampler2);
+        particle.contagion(particles);
       }
       if (touched) {
         particle.changePos();
@@ -176,7 +156,7 @@ const s = instance => {
       particles.forEach(particle => {
         if (Math.random() > 0.95 && particle.virus && !particle.died) {
           particle.died = true;
-          sampler2.triggerAttack(130 + (particle.r - 20) * 2);
+          particle.triggerAttack();
           deathToday += 1;
         }
       });
@@ -215,6 +195,7 @@ const s = instance => {
   };
 
   const setListeners = (divNode, sk) => { //eslint-disable-line
+    console.log(divNode);
     divNode.addEventListener(
       "click",
       async () => {
